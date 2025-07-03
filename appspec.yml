@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+files:
+  - source: /server # Path to the Node.js backend folder within the CodeBuild artifact
+    destination: /var/www/nodejs-app # The target directory for backend on your EC2 instance
+  - source: /client/build # Path to the built React frontend within the CodeBuild artifact
+    destination: /var/www/html # The target directory for frontend on your EC2 instance (e.g., Nginx root)
+  - source: /nginx # Path to Nginx config files within the CodeBuild artifact
+    destination: /etc/nginx/sites-available/ # Or wherever your Nginx config lives
+hooks:
+  BeforeInstall:
+    - location: server/scripts/install_dependencies.sh # Script to install Node.js, npm, Nginx, etc. on EC2
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: server/scripts/start_application.sh # Script to start your Node.js app and configure Nginx
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: server/scripts/stop_application.sh # Script to gracefully stop your Node.js app and Nginx
+      timeout: 60
+      runas: root
