@@ -3,50 +3,36 @@
 phases:
   install:
     runtime-versions:
-      nodejs: 18 # Use a version that satisfies your dependencies (e.g., 18 or 20)
+      nodejs: 18  # Ensure this matches your required Node version
     commands:
-      # You might want to install global dependencies here if any are needed
-      # e.g., - npm install -g yarn
+      - echo "Installing dependencies..."
+      - cd client
+      - npm install # Install client dependencies
+      - npm run build # Build the client app
+      - cd .. # Return to root directory
+
+      - cd server
+      - npm install # Install server dependencies
+      - cd .. # Return to root directory
 
   build:
     commands:
-      - echo "------------------- Building Client -------------------"
-      - cd client
-      - npm install # Install client dependencies
-      - npm run build # Build the client application (e.g., React, Vue, Angular)
-      - cd .. # Go back to the root directory
-
-      - echo "------------------- Building Server -------------------"
-      - cd server
-      - npm install # Install server dependencies
-      
-      - cd .. # Go back to the root directory
+      - echo "Build phase completed successfully!"
 
   post_build:
     commands:
       - echo "------------------- Deploying Client to S3 -------------------"
       - aws s3 sync client/build/ s3://wildrexpipelinetesting54321/client/ --delete
+      - echo "Client deployed to S3!"
 
-      - echo "------------------- Deploying Server to S3 -------------------"
-      # IMPORTANT: Re-evaluate this. Deploying a 'server/build' to S3
-      # might not be the typical way to deploy a Node.js backend.
-      # Often, you'd deploy the *entire* server folder (after npm install)
-      # to an EC2 instance, Lambda, Elastic Beanstalk, etc.
-      # If your 'server/build' contains a deployable artifact (e.g., a compiled binary,
-      # or a bundled serverless function), then this sync is appropriate.
-      - aws s3 sync server/build/ s3://wildrexpipelinetesting54321/server/ --delete
+      - echo "------------------- Deploying Server to EC2 -------------------"
+      # Assuming you're using EC2/Elastic Beanstalk for server deployment
+      # For example, using CodeDeploy to deploy server code to EC2
+      - aws deploy push --Code_Build_App --s3-location s3://wildrexpipelinetesting54321/server/Code_Build_App.zip --description "Deploy Server Code"
+      - echo "Server deployed to EC2!"
 
 artifacts:
   files:
-    # Collect artifacts from both client and server builds if you want them in the CodeBuild output ZIP
     - 'client/build/**/*'
-    - 'server/build/**/*' # This assumes 'npm run build' in 'server' creates content in 'server/build'
-    # If your server requires files from its root (e.g., package.json, main entry file), add them here
-    # - 'server/package.json'
-    # - 'server/index.js' # if your server's main file is at server/index.js
-
-  # This makes the artifact paths relative to the root of your source directory.
-  base-directory: '.'
-  # You might want to discard this entirely if the S3 syncs are your final deployment steps
-  # and you don't need a CodeBuild output artifact.
-  # discard-paths: yes # Use this if you only care about the S3 syncs, not the CodeBuild artifact itself.
+    - 'server/build/**/*'
+  base-directory: '.'  # Adjust if you want to collect more specific artifacts (e.g., server folder)
