@@ -13,7 +13,7 @@ phases:
 
       - cd server
       - npm install  # Install server dependencies
-      - npm run build  # Build the server app (if needed)
+    
       - cd ..  # Return to root directory
 
   build:
