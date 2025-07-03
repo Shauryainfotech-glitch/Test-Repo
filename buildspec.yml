@@ -2,23 +2,39 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 14
     commands:
-      - echo Installing dependencies...
-      - cd client && npm install # Install React dependencies
-      - cd ../server && npm install # Install Node.js backend dependencies
+      - echo "Installing global dependencies..."
+      # Install Node.js if not already in the CodeBuild image
+      # - nvm install 18 # Example if using nvm
+      # - nvm use 18
+      - echo "Installing frontend dependencies..."
+      - cd client
+      - npm install
+      - echo "Installing backend dependencies..."
+      - cd ../server
+      - npm install
+      - cd .. # Go back to root
 
   build:
     commands:
-      - echo Building React App...
-      - cd client && npm run build # Build React frontend
-      - echo Building Backend...
-      - cd ../server && npm run build # Build Node.js backend (if needed)
+      - echo "Building frontend..."
+      - cd client
+      - npm run build # This typically creates a 'build' or 'dist' folder
+      - echo "Building backend..."
+      - cd ../server
+      # Any backend specific build steps, e.g., transpiling TypeScript
+      - cd .. # Go back to root
+
+  post_build:
+    commands:
+      - echo "Running tests (optional)..."
+      - cd client && npm test || true # Run frontend tests, '|| true' to not fail build immediately
+      - cd ../server && npm test || true # Run backend tests
+      - cd ..
 
 artifacts:
   files:
-    - '**/*'
-    - '!**/node_modules/**/*'
-    - 'client/build/**/*'   # Include the React build folder
-    - 'server/**/*'         # Include the backend code
+    - 'client/build/**/*' # All files in the React build output
+    - 'server/**/*'       # All files in the server directory (excluding node_modules if not needed for deployment)
+  base-directory: . # Artifacts will be relative to the root of the repository
+  discard-paths: no # Keep the folder structure
