@@ -7,13 +7,14 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - cd client
-      - npm install # Install client dependencies
-      - npm run build # Build the client app
-      - cd .. # Return to root directory
+      - npm install  # Install client dependencies
+      - npm run build  # Build the client app
+      - cd ..  # Return to root directory
 
       - cd server
-      - npm install # Install server dependencies
-      - cd .. # Return to root directory
+      - npm install  # Install server dependencies
+      - npm run build  # Build the server app (if needed)
+      - cd ..  # Return to root directory
 
   build:
     commands:
@@ -25,7 +26,7 @@ phases:
       - aws s3 sync client/build/ s3://wildrexpipelinetesting54321/client/ --delete
       - echo "Client deployed to S3!"
 
-      - echo "------------------- Deploying Server to EC2 -------------------"
+      - echo "------------------- Deploying Server to EC2 via CodeDeploy -------------------"
       - aws deploy push --application-name Code_Build_App --s3-location s3://wildrexpipelinetesting54321/server/Code_Build_App.zip --description "Deploy Server Code"
       - echo "Server deployed to EC2!"
 
