@@ -19,7 +19,7 @@ phases:
       - echo "------------------- Building Server -------------------"
       - cd server
       - npm install # Install server dependencies
-      - npm run build # Build the server application (e.g., TypeScript compilation)
+      
       - cd .. # Go back to the root directory
 
   post_build:
