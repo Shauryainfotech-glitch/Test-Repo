@@ -5,33 +5,34 @@ phases:
     commands:
       - echo "Installing frontend dependencies..."
       - cd client
-      - npm install
+      - npm install # Installs packages for your React app
       - echo "Installing backend dependencies..."
       - cd ../server
-      - npm install
-      - cd ..
+      - npm install # Installs packages for your Node.js app
+      - cd .. # Return to repository root
 
   build:
     commands:
       - echo "Building React frontend..."
       - cd client
-      - npm run build
+      - npm run build # This command creates the 'build' (or 'dist') folder with static assets
       - echo "Building Node.js backend (if any transpilation needed)..."
       - cd ../server
-      - cd ..
+      # Add any backend-specific build commands here, e.g., 'npm run build' for TypeScript
+      - cd .. # Return to repository root
 
   post_build:
     commands:
       - echo "Running frontend tests (optional)..."
-      - cd client && npm test || true
+      - cd client && npm test || true # Run React tests. '|| true' allows build to continue on test failure.
       - echo "Running backend tests (optional)..."
-      - cd ../server && npm test || true
+      - cd ../server && npm test || true # Run Node.js tests.
       - cd ..
 
 artifacts:
   files:
-    - 'client/build/**/*'
-    - 'server/**/*'
-    - 'nginx/**/*'
-  base-directory: .
-  discard-paths: no
+    - 'client/build/**/*' # Include all built React files
+    - 'server/**/*'       # Include all Node.js backend files (adjust to exclude node_modules if installing on target)
+    - 'nginx/**/*'        # Include Nginx configuration files if you're using them from the repo
+  base-directory: . # Paths are relative to the repository root
+  discard-paths: no # Preserve the 'client/build', 'server', and 'nginx' folder structure in the artifact
