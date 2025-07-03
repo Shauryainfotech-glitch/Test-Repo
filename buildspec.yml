@@ -13,7 +13,7 @@ phases:
 
       - cd server
       - npm install  # Install server dependencies
-    
+     
       - cd ..  # Return to root directory
 
   build:
@@ -22,11 +22,12 @@ phases:
 
   post_build:
     commands:
-
+      - echo "------------------- Deploying Client to S3 -------------------"
+      - aws s3 sync client/build/ s3://wildrexpipelinetesting54321/client/ --delete
+      - echo "Client deployed to S3!"
 
       - echo "------------------- Deploying Server to EC2 via CodeDeploy -------------------"
-      -aws deploy push --application-name Code_Build_App --s3-location s3://wildrexpipelinetesting54321/server/Code_Build_App.zip --description "Deploy Server Code" --region ap-southeast-1
-
+      - aws deploy push --application-name Code_Build_App --s3-location s3://wildrexpipelinetesting54321/server/Code_Build_App.zip --description "Deploy Server Code" --region ap-southeast-1
       - echo "Server deployed to EC2!"
 
 artifacts:
