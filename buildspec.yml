@@ -12,7 +12,7 @@ phases:
       - cd ..  # Return to root directory
 
       - cd server
-      - npm install  # Install server dependencies
+      - npm install --f  # Install server dependencies
      
       - cd ..  # Return to root directory
 

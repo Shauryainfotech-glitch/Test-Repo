@@ -1,22 +1,44 @@
 version: 0.0
 os: linux
 files:
-  - source: /server # Path to the Node.js backend folder within the CodeBuild artifact
+  # Copy the *entire content* of the deployed bundle (which is your server directory)
+  # to the destination. Since 'server/' is the root of the bundle, this is '/'
+  - source: / # This is now the root of the *server* code, NOT the root of your Git repo
     destination: /var/www/nodejs-app # The target directory for backend on your EC2 instance
-  - source: /client/build # Path to the built React frontend within the CodeBuild artifact
-    destination: /var/www/html # The target directory for frontend on your EC2 instance (e.g., Nginx root)
-  - source: /nginx # Path to Nginx config files within the CodeBuild artifact
-    destination: /etc/nginx/sites-available/ # Or wherever your Nginx config lives
+
+  # You need to decide how 'client/build' and 'nginx' are deployed.
+  # If they are *within* your server directory when it's zipped:
+  # If server/client/build exists:
+  - source: /client/build # Assumes client/build is now inside the server directory
+    destination: /var/www/html
+
+  # If server/nginx exists:
+  - source: /nginx # Assumes nginx is now inside the server directory
+    destination: /etc/nginx/sites-available/
+
+  # If 'client/build' and 'nginx' are NOT part of your 'server' directory in Git,
+  # then 'aws deploy push --source server/' will NOT include them.
+  # You will need a different strategy for them (e.g., separate S3 sync in buildspec hooks,
+  # or a complex buildspec that creates a custom artifact zip for CodeDeploy).
+  # For now, let's assume they are structured like:
+  # server/
+  #   ├── appspec.yml
+  #   ├── scripts/
+  #   ├── client/build/ (if copied here during CodeBuild)
+  #   └── nginx/ (if Nginx config is moved here)
+  #   └── ...
+  # This is the most common way to bundle for CodeDeploy if deploying both.
+
 hooks:
   BeforeInstall:
-    - location: server/scripts/install_dependencies.sh # Script to install Node.js, npm, Nginx, etc. on EC2
+    - location: scripts/install_dependencies.sh # Path relative to the bundle root (which is now server/)
       timeout: 300
       runas: root
   AfterInstall:
-    - location: server/scripts/start_application.sh # Script to start your Node.js app and configure Nginx
+    - location: scripts/start_application.sh
       timeout: 300
       runas: root
   ApplicationStop:
-    - location: server/scripts/stop_application.sh # Script to gracefully stop your Node.js app and Nginx
+    - location: scripts/stop_application.sh
       timeout: 60
       runas: root
