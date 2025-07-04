@@ -6,7 +6,7 @@ cd /var/www/nodejs-app/server
 npm install
 
 # Start the Node.js application using PM2
-pm2 start app.js --name "my-node-app" # Replace app.js with your main entry file
+pm2 start server.js --name "my-node-app" # Replace app.js with your main entry file
 pm2 save
 
 # Configure and start Nginx for frontend
