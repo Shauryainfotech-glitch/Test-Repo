@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: / # This means "the root of the deployment bundle"
+  - source: /
     destination: /var/www/nodejs-app
   - source: /client/build
     destination: /var/www/html
@@ -9,14 +9,14 @@ files:
     destination: /etc/nginx/sites-available/
 hooks:
   BeforeInstall:
-    - location: server/scripts/install_dependencies.sh # Path relative to the bundle root
+    - location: server/scripts/install_dependencies.sh # <-- CORRECTED PATH
       timeout: 300
       runas: root
   AfterInstall:
-    - location: server/scripts/start_application.sh
+    - location: server/scripts/start_application.sh    # <-- CORRECTED PATH
       timeout: 300
       runas: root
   ApplicationStop:
-    - location: scripts/stop_application.sh
+    - location: server/scripts/stop_application.sh     # <-- CORRECTED PATH
       timeout: 60
       runas: root
